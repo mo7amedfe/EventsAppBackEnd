@@ -1,7 +1,6 @@
 const eventModel = require("../models/event.model");
 const asyncHandler = require("../utils/asyncHandler");
 
-
 exports.createEvent = asyncHandler(async (req, res) => {
   const { date, time, location, price, title, description } = req.body;
 

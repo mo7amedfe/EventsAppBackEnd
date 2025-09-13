@@ -8,7 +8,7 @@ const app = express();
 app.use(express.json());
 app.use('/user', require('./routes/user.route'));
 app.use('/event', require('./routes/event.route'));
-
+app.use('/cart', require('./routes/cart.route'));  
 
 
 app.use(errorsMW)
