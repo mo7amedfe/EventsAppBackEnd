@@ -1,4 +1,5 @@
 const eventModel = require("../models/event.model");
+const bookedEventModel = require("../models/bookedEvents.model");
 const asyncHandler = require("../utils/asyncHandler");
 
 exports.createEvent = asyncHandler(async (req, res) => {
@@ -19,7 +20,6 @@ exports.createEvent = asyncHandler(async (req, res) => {
   return res.status(201).json({ message: "Event created", event: newEvent });
 });
 
-
 exports.getAllEvents = asyncHandler(async (req, res) => {
   let events;
   if (req.user.role === "admin" || req.user.role === "moderator") {
@@ -30,7 +30,6 @@ exports.getAllEvents = asyncHandler(async (req, res) => {
 
   return res.status(200).json({ message: "success", events });
 });
-
 
 exports.getEventById = asyncHandler(async (req, res) => {
   const id = req.params.id;
@@ -50,7 +49,6 @@ exports.getEventById = asyncHandler(async (req, res) => {
 
   return res.status(200).json({ message: "success", event });
 });
-
 
 exports.deleteEvent = asyncHandler(async (req, res) => {
   const organizerId = req.user._id;
@@ -74,6 +72,34 @@ exports.deleteEvent = asyncHandler(async (req, res) => {
   return res.status(200).json({ message: "Event deleted successfully" });
 });
 
+exports.bookedEvents = asyncHandler(async (req, res) => {
+  let events;
+  if (req.user.role === "moderator" || req.user.role === "admin") {
+    events = await bookedEventModel
+      .find()
+      .populate("event_id")
+      .populate("user_id", " name email");
+  }
+  const userId = req.user._id;
+
+  if (req.user.role === "organizer") {
+    events = await bookedEventModel
+      .find()
+      .populate({
+        path: "event_id",
+        match: { organizer_id: userId },
+      })
+      .populate("user_id", "name email");
+    events = events.filter((b) => b.event_id !== null);
+  }
+  if (req.user.role === "user") {
+    events = await bookedEventModel
+      .find({ user_id: userId })
+      .populate("event_id");
+  }
+  return res.status(200).json({ message: "success", events });
+});
+
 // Admin/Moderator
 exports.giveDecision = asyncHandler(async (req, res) => {
   const { decision, reason } = req.body;
@@ -85,7 +111,9 @@ exports.giveDecision = asyncHandler(async (req, res) => {
   }
 
   if (decision === "Declined" && !reason) {
-    return res.status(400).json({ message: "Reason is required for declining an event" });
+    return res
+      .status(400)
+      .json({ message: "Reason is required for declining an event" });
   }
 
   if (!["Approved", "Declined"].includes(decision)) {
@@ -105,5 +133,7 @@ exports.giveDecision = asyncHandler(async (req, res) => {
     { new: true }
   );
 
-  return res.status(200).json({ message: `Event ${decision.toLowerCase()}`, event: updatedEvent });
+  return res
+    .status(200)
+    .json({ message: `Event ${decision.toLowerCase()}`, event: updatedEvent });
 });
