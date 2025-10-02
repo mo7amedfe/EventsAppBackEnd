@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const eventController = require('./../controllers/event.controller');
-const eventImageUpload = require('./../midllewares/eventImageUpload');
+const imageUpload = require('./../midllewares/imageUpload');
 const authorize = require('./../midllewares/authorize.middleware');
 
-router.post("/",authorize("admin","moderator","organizer") ,eventImageUpload.single('image'),eventController.createEvent);
+router.post("/",authorize("admin","moderator","organizer") ,imageUpload("events").single('eventImage'),eventController.createEvent);
 router.delete("/:id",authorize("admin","moderator","organizer"),eventController.deleteEvent);
 
 router.get("/",authorize("admin","moderator","organizer","user"),eventController.getAllEvents);

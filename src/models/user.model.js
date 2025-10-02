@@ -27,11 +27,17 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    required:true,
-    enum: ["user", "admin","organizer","moderator"],
-   
+    required: true,
+    enum: ["user", "admin", "organizer", "moderator"],
   },
   date: { type: Date, default: Date.now },
+  profilePic: {
+    type: String,
+  },
+  bio:{
+    type: String,
+
+  }
 });
 
 userSchema.set("toJSON", {
@@ -48,9 +54,11 @@ userSchema.method("getAuthToken", function () {
       name: this.name,
       email: this.email,
       role: this.role,
+      profilePic:this.profilePic,
+      bio:this.bio
     },
     process.env.JWT_SECRET
   );
 });
 
-module.exports=mongoose.model("User", userSchema);
+module.exports = mongoose.model("User", userSchema);
